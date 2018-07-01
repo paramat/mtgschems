@@ -1,4 +1,4 @@
-mtgschems 0.1.0
+mtgschems 0.1.1
 Forked from saveschems 0.2.2 by paramat, sofar and Shara RedCat
 For Minetest 0.4.13 and later
 Depends: default

@@ -1,5 +1,8 @@
 -- Schematic file format version 4
 
+-- Standard table format, structure appears inverted in each z slice.
+-- Z, Y and X are formatted in increasing order.
+
 local mts_save = function(name, schematic)
 	local s = minetest.serialize_schematic(schematic, "mts", {})
 	local path = minetest.get_modpath("mtgschems") .. "/schematics"
@@ -14,16 +17,29 @@ local mts_save = function(name, schematic)
 	print("Wrote: " .. filename)
 end
 
--- This save function reverses the table to allow upright XY slice format.
--- Warning: This can currently result in a transformed mirror-image schematic.
 
-local mts_save_rev = function(name, schematic)
-	local datarev = {}
-	local datasize = #schematic.data
-	for i = 1, datasize do
-		datarev[i] = schematic.data[datasize + 1 - i]
+-- Transformed table format, structure appears upright in each z slice.
+-- Z and X are formatted in increasing order but Y is formatted in decreasing
+-- order.
+
+local mts_save_up = function(name, schematic)
+	--print("data size " .. #schematic.data)
+	local data_up = {}
+	local data_up_ind = 1
+
+	for z = 0, schematic.size.z - 1 do
+		for y = schematic.size.y - 1, 0, -1 do
+			for x = 1, schematic.size.x do
+				local read_ind = z * schematic.size.x * schematic.size.y +
+					y * schematic.size.x + x
+				--print("read_ind " .. read_ind)
+				data_up[data_up_ind] = schematic.data[read_ind]
+				data_up_ind = data_up_ind + 1
+			end
+		end 
 	end
-	schematic.data = datarev
+
+	schematic.data = data_up
 
 	local s = minetest.serialize_schematic(schematic, "mts", {})
 	local path = minetest.get_modpath("mtgschems") .. "/schematics"
@@ -38,9 +54,11 @@ local mts_save_rev = function(name, schematic)
 	print("Wrote: " .. filename)
 end
 
+
 -- This node will not replace existing world nodes
 
 local _ = {name = "air", prob = 0}
+
 
 -- Mapgen Aspen tree
 
@@ -226,6 +244,7 @@ mts_save("aspen_tree_from_sapling", {
 	},
 })
 
+
 -- Mapgen Apple tree
 
 local L = {name = "default:leaves", prob = 191}
@@ -346,6 +365,7 @@ mts_save("apple_tree_from_sapling", {
 		{ypos = 6, prob = 127},
 	},
 })
+
 
 -- Mapgen Jungle tree
 
@@ -567,6 +587,7 @@ mts_save("jungle_tree_from_sapling", {
 		{ypos=10, prob=191},
 	},
 })
+
 
 -- Mapgen Pine tree
 
@@ -881,6 +902,7 @@ mts_save("snowy_pine_tree_from_sapling", {
 	},
 })
 
+
 -- Mapgen Acacia tree
 
 local L = {name = "default:acacia_leaves", prob = 255}
@@ -1093,6 +1115,7 @@ mts_save("acacia_tree_from_sapling", {
 	},
 })
 
+
 -- Large cactus
 
 local C = {name = "default:cactus", prob = 255, param2 = 20}
@@ -1112,6 +1135,7 @@ mts_save("large_cactus", {
 	},
 })
 
+
 -- Papyrus
 
 mts_save("papyrus", {
@@ -1130,6 +1154,7 @@ mts_save("papyrus", {
 		{ypos = 3, prob = 127},
 	},
 })
+
 
 -- Corals
 
@@ -1168,6 +1193,7 @@ mts_save("corals", {
 	}
 })
 
+
 -- Bush
 
 local L = {name = "default:bush_leaves", prob = 255}
@@ -1191,6 +1217,7 @@ mts_save("bush", {
 		N, M, N,
 	},
 })
+
 
 -- Acacia bush
 
@@ -1216,6 +1243,7 @@ mts_save("acacia_bush", {
 	},
 })
 
+
 -- Apple tree log
 
 mts_save("apple_log", {
@@ -1233,6 +1261,7 @@ mts_save("apple_log", {
 		{name = "air", prob = 0},
 	},
 })
+
 
 -- Jungletree log
 
@@ -1252,6 +1281,7 @@ mts_save("jungle_log", {
 	},
 })
 
+
 -- Pine tree log
 
 mts_save("pine_log", {
@@ -1270,6 +1300,7 @@ mts_save("pine_log", {
 	},
 })
 
+
 -- Acacia tree log
 
 mts_save("acacia_log", {
@@ -1282,6 +1313,7 @@ mts_save("acacia_log", {
 		{name = "default:acacia_tree", param2 = 12, prob = 127},
 	},
 })
+
 
 -- Aspen tree log
 
@@ -1301,6 +1333,7 @@ mts_save("aspen_log", {
 	},
 })
 
+
 -- Mapgen emergent jungle tree
 
 local L = {name = "default:jungleleaves", prob = 255}
@@ -1309,7 +1342,7 @@ local M = {name = "default:jungleleaves", prob = 127}
 local B = {name = "default:jungletree", prob = 255, force_place = true}
 local U = {name = "default:jungletree", prob = 127, force_place = true}
 
-mts_save("emergent_jungle_tree_3", {
+mts_save("emergent_jungle_tree", {
 	size = {x = 7, y = 37, z = 7},
 	data = {
 		_, _, _, _, _, _, _,
@@ -1603,7 +1636,7 @@ local S = {name = "default:jungletree", prob = 255, force_place = true}
 local B = {name = "default:jungletree", prob = 255}
 local U = {name = "default:jungletree", prob = 127}
 
-mts_save("emergent_jungle_tree_from_sapling_3", {
+mts_save("emergent_jungle_tree_from_sapling", {
 	size = {x = 7, y = 37, z = 7},
 	data = {
 		_, _, _, _, _, _, _,
@@ -1887,6 +1920,7 @@ mts_save("emergent_jungle_tree_from_sapling_3", {
 		{ypos = 24, prob = 127},
 	},
 })
+
 
 -- Mapgen small pine tree
 
